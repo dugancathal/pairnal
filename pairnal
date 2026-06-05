@@ -1,0 +1,163 @@
+#!/usr/bin/env ruby
+
+require "date"
+
+module PairRotation
+  NEVER_PAIRED_STALENESS = 365
+
+  Group = Data.define(:members) do
+    def self.of(*members) = new(members:)
+
+    def solo? = members.size == 1
+    def pair? = members.size == 2
+    def mob? = members.size >= 3
+
+    def pairs
+      members.combination(2).map { |a, b| [a, b].sort }
+    end
+
+    def to_s = members.join(" + ")
+  end
+
+  Session = Data.define(:date, :groups) do
+    def pairs = groups.flat_map(&:pairs)
+  end
+
+  History = Data.define(:roster, :sessions) do
+    def last_paired
+      sessions.each_with_object({}) do |session, acc|
+        session.pairs.each do |key|
+          acc[key] = session.date if acc[key].nil? || acc[key] < session.date
+        end
+      end
+    end
+  end
+
+  Allocation = Data.define(:groups)
+
+  Recommendation = Data.define(:allocation, :score)
+
+  class SessionBuilder
+    attr_reader :date, :groups
+
+    def initialize(date)
+      @date = date
+      @groups = []
+    end
+
+    def pair(a, b)
+      @groups << Group.of(a, b)
+    end
+
+    def mob(*people)
+      raise ArgumentError, "a mob needs 3+ people, got #{people.size}" if people.size < 3
+
+      @groups << Group.of(*people)
+    end
+
+    def to_session = Session.new(date:, groups:)
+  end
+
+  class HistoryBuilder
+    def initialize
+      @roster = []
+      @sessions = []
+    end
+
+    def roster(*people)
+      @roster = people
+    end
+
+    def on(date_str, &block)
+      builder = SessionBuilder.new(Date.iso8601(date_str))
+      builder.instance_eval(&block)
+      @sessions << builder.to_session
+    end
+
+    def to_history = History.new(roster: @roster, sessions: @sessions)
+  end
+
+  def self.load_history(path)
+    builder = HistoryBuilder.new
+    builder.instance_eval(File.read(path), path)
+    builder.to_history
+  end
+
+  class Recommender
+    def initialize(history, today: Date.today, never_paired: NEVER_PAIRED_STALENESS)
+      @history = history
+      @today = today
+      @never_paired = never_paired
+      @last_paired = history.last_paired
+    end
+
+    def recommend(n: 3)
+      allocations(@history.roster)
+        .map { |alloc| Recommendation.new(allocation: alloc, score: score(alloc)) }
+        .sort_by { |rec| -rec.score }
+        .first(n)
+    end
+
+    def staleness(a, b)
+      date = @last_paired[[a, b].sort]
+      date ? (@today - date).to_i : @never_paired
+    end
+
+    def describe(group)
+      return "#{group}  -- sits out" if group.solo?
+
+      a, b = group.members
+      if @last_paired[[a, b].sort]
+        "#{group}  (#{staleness(a, b)}d since last worked together)"
+      else
+        "#{group}  (never paired)"
+      end
+    end
+
+    private
+
+    def score(alloc)
+      alloc.groups.sum { |group| group.pairs.sum { |a, b| staleness(a, b) } }
+    end
+
+    def allocations(roster, &blk)
+      return enum_for(:allocations, roster) unless blk
+
+      if roster.size.even?
+        matchings(roster) { |groups| yield Allocation.new(groups:) }
+      else
+        roster.each_with_index do |out, i|
+          rest = roster[0...i] + roster[(i + 1)..]
+          matchings(rest) { |groups| yield Allocation.new(groups: groups + [Group.of(out)]) }
+        end
+      end
+    end
+
+    def matchings(people, &blk)
+      return enum_for(:matchings, people) unless blk
+
+      if people.empty?
+        yield []
+        return
+      end
+
+      first, *rest = people
+      rest.each_with_index do |partner, i|
+        remaining = rest[0...i] + rest[(i + 1)..]
+        matchings(remaining) { |sub| yield([Group.of(first, partner)] + sub) }
+      end
+    end
+  end
+end
+
+if __FILE__ == $PROGRAM_NAME
+  path = ARGV[0] || File.expand_path(".pair-history", Dir.pwd)
+  history = PairRotation.load_history(path)
+  recommender = PairRotation::Recommender.new(history, today: Date.today)
+
+  recommender.recommend(n: 3).each_with_index do |rec, i|
+    puts "=== Option #{i + 1}  (total staleness: #{rec.score}) ==="
+    rec.allocation.groups.each { |group| puts "  #{recommender.describe(group)}" }
+    puts
+  end
+end
