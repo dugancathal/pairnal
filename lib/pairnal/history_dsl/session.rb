@@ -8,6 +8,10 @@ module Pairnal
         @groups = []
       end
 
+      def solo(a)
+        @groups << Group.of(a)
+      end
+
       def pair(a, b)
         @groups << Group.of(a, b)
       end
