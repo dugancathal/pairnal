@@ -9,7 +9,7 @@ class TestHistory < Minitest::Test
       roster :alice, :bob
       on("2026-01-01") { pair :alice, :bob }
     end
-    assert_equal [:alice, :bob], history.roster
+    assert_equal [:alice, :bob], history.roster.members
     assert_equal 1, history.sessions.size
   end
 
@@ -22,7 +22,7 @@ class TestHistory < Minitest::Test
     file.close
 
     history = Pairnal::History.load_path(file.path)
-    assert_equal [:alice, :bob], history.roster
+    assert_equal [:alice, :bob], history.roster.members
     assert_equal 1, history.sessions.size
   ensure
     file&.unlink

@@ -36,7 +36,8 @@ end
 class TestHistoryDslHistory < Minitest::Test
   def test_roster_sets_people_on_built_history
     history = Pairnal::History.load { roster :alice, :bob, :carol }
-    assert_equal [:alice, :bob, :carol], history.roster
+    assert_instance_of Pairnal::Roster, history.roster
+    assert_equal [:alice, :bob, :carol], history.roster.members
   end
 
   def test_on_adds_a_dated_session

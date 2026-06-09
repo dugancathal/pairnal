@@ -16,7 +16,7 @@ module Pairnal
         @sessions << builder.to_session
       end
 
-      def to_history = Pairnal::History.new(roster: @roster, sessions: @sessions)
+      def to_history = Pairnal::History.new(roster: Roster.new(@roster), sessions: @sessions)
     end
   end
 end

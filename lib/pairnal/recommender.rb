@@ -41,11 +41,12 @@ module Pairnal
     def allocations(roster, &blk)
       return enum_for(:allocations, roster) unless blk
 
-      if roster.size.even?
-        matchings(roster) { |groups| yield Allocation.new(groups:) }
+      members = roster.to_a
+      if members.size.even?
+        matchings(members) { |groups| yield Allocation.new(groups:) }
       else
-        roster.each_with_index do |out, i|
-          rest = roster[0...i] + roster[(i + 1)..]
+        members.each_with_index do |out, i|
+          rest = members[0...i] + members[(i + 1)..]
           matchings(rest) { |groups| yield Allocation.new(groups: groups + [Group.of(out)]) }
         end
       end
