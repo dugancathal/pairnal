@@ -13,7 +13,8 @@ module Pairnal
 
         a, b = group.members
         if @recommender.ever_paired?(a, b)
-          "#{group}  (#{@recommender.staleness(a, b)}d since last worked together)"
+          warning = @recommender.over_paired?(a, b) ? " (!)" : ""
+          "#{group}  (#{@recommender.staleness(a, b)}d since last worked together#{warning})"
         else
           "#{group}  (never paired)"
         end

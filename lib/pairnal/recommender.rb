@@ -23,6 +23,11 @@ module Pairnal
 
     def ever_paired?(a, b) = @last_paired[[a, b].sort]
 
+    def over_paired?(a, b, streak: 2)
+      recent = @history.sessions.sort_by(&:date).last(streak)
+      recent.size == streak && recent.all? { |s| s.pairs.include?([a, b].sort) }
+    end
+
     private
 
     def score(alloc)

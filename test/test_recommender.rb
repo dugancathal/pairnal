@@ -61,4 +61,30 @@ class TestRecommender < Minitest::Test
     end
   end
 
+  def test_over_paired_true_when_pair_in_last_two_sessions
+    history = Pairnal::History.load do
+      roster :alice, :bob
+      on("2026-06-03") { pair :alice, :bob }
+      on("2026-06-04") { pair :alice, :bob }
+    end
+    recommender = Pairnal::Recommender.new(history, today: TODAY)
+    assert recommender.over_paired?(:alice, :bob)
+  end
+
+  def test_over_paired_false_when_pair_only_in_one_recent_session
+    history = Pairnal::History.load do
+      roster :alice, :bob, :carol
+      on("2026-06-03") { pair :alice, :carol }
+      on("2026-06-04") { pair :alice, :bob }
+    end
+    recommender = Pairnal::Recommender.new(history, today: TODAY)
+    refute recommender.over_paired?(:alice, :bob)
+  end
+
+  def test_over_paired_false_when_never_paired
+    history = Pairnal::History.load { roster :alice, :bob }
+    recommender = Pairnal::Recommender.new(history, today: TODAY)
+    refute recommender.over_paired?(:alice, :bob)
+  end
+
 end

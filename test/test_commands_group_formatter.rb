@@ -30,6 +30,25 @@ class TestCommandsGroupFormatter < Minitest::Test
     assert_includes result, "since last worked together"
   end
 
+  def test_over_paired_appends_warning
+    history = Pairnal::History.load do
+      roster :alice, :bob
+      on("2026-06-03") { pair :alice, :bob }
+      on("2026-06-04") { pair :alice, :bob }
+    end
+    result = format(Pairnal::Group.of(:alice, :bob), history:)
+    assert_includes result, "(!)"
+  end
+
+  def test_not_over_paired_has_no_warning
+    history = Pairnal::History.load do
+      roster :alice, :bob
+      on("2026-05-06") { pair :alice, :bob }
+    end
+    result = format(Pairnal::Group.of(:alice, :bob), history:)
+    refute_includes result, "(!)"
+  end
+
   private
 
   def format(group, history: nil)
