@@ -16,6 +16,7 @@ module Pairnal
       case command
       when "recommend" then Commands::Recommend.new(history).call
       when "stats" then Commands::Stats.new(history, since: options[:since]).call
+      when "show" then Commands::Show.new(history).call(args)
       when "record" then Commands::Record.new(history.roster, options[:history]).call(args, date: options[:date])
       end
     end
