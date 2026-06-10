@@ -9,23 +9,11 @@ module Pairnal
 
         def call(output: $stdout)
           recommender = Recommender.new(@history, today: @today)
+          formatter = GroupFormatter.new(recommender)
           recommender.recommend(n: 3).each_with_index do |rec, i|
             output.puts "=== Option #{i + 1}  (total staleness: #{rec.score}) ==="
-            rec.allocation.groups.each { |group| output.puts "  #{describe_group(group, recommender)}" }
+            rec.allocation.groups.each { |group| output.puts "  #{formatter.call(group)}" }
             output.puts
-          end
-        end
-
-        private
-
-        def describe_group(group, recommender)
-          return "#{group}  -- solo" if group.solo?
-
-          a, b = group.members
-          if recommender.ever_paired?(a, b)
-            "#{group}  (#{recommender.staleness(a, b)}d since last worked together)"
-          else
-            "#{group}  (never paired)"
           end
         end
       end
