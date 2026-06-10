@@ -40,6 +40,13 @@ class TestHistoryDslHistory < Minitest::Test
     assert_equal [:alice, :bob, :carol], history.roster.members
   end
 
+  def test_roster_accepts_alias_name_pairs
+    history = Pairnal::History.load { roster alice: "Alice Smith", bob: "Bob Jones" }
+    assert_equal [:alice, :bob], history.roster.members
+    assert_equal "Alice Smith", history.roster.display_name(:alice)
+    assert_equal "Bob Jones", history.roster.display_name(:bob)
+  end
+
   def test_on_adds_a_dated_session
     history = Pairnal::History.load do
       roster :alice, :bob
@@ -47,6 +54,22 @@ class TestHistoryDslHistory < Minitest::Test
     end
     assert_equal 1, history.sessions.size
     assert_equal Date.new(2026, 1, 1), history.sessions.first.date
+  end
+
+  def test_pair_resolves_full_name_to_alias
+    history = Pairnal::History.load do
+      roster alice: "Alice Smith", bob: "Bob Jones"
+      on("2026-01-01") { pair "Alice Smith", "Bob Jones" }
+    end
+    assert_equal [:alice, :bob], history.sessions.first.groups.first.members
+  end
+
+  def test_mob_resolves_full_names_to_aliases
+    history = Pairnal::History.load do
+      roster alice: "Alice Smith", bob: "Bob Jones", carol: "Carol White"
+      on("2026-01-01") { mob "Alice Smith", "Bob Jones", "Carol White" }
+    end
+    assert_equal [:alice, :bob, :carol], history.sessions.first.groups.first.members
   end
 
   def test_to_history_returns_history_instance
