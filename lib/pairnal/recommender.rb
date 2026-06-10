@@ -21,16 +21,7 @@ module Pairnal
       date ? (@today - date).to_i : @never_paired
     end
 
-    def describe(group)
-      return "#{group}  -- solo" if group.solo?
-
-      a, b = group.members
-      if @last_paired[[a, b].sort]
-        "#{group}  (#{staleness(a, b)}d since last worked together)"
-      else
-        "#{group}  (never paired)"
-      end
-    end
+    def ever_paired?(a, b) = @last_paired[[a, b].sort]
 
     private
 

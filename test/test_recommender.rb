@@ -61,26 +61,4 @@ class TestRecommender < Minitest::Test
     end
   end
 
-  def test_describe_solo_includes_solos
-    history = Pairnal::History.load { roster :alice }
-    recommender = Pairnal::Recommender.new(history, today: TODAY)
-    assert_includes recommender.describe(Pairnal::Group.of(:alice)), "solo"
-  end
-
-  def test_describe_never_paired_includes_never_paired
-    history = Pairnal::History.load { roster :alice, :bob }
-    recommender = Pairnal::Recommender.new(history, today: TODAY)
-    assert_includes recommender.describe(Pairnal::Group.of(:alice, :bob)), "never paired"
-  end
-
-  def test_describe_previously_paired_includes_days_and_label
-    history = Pairnal::History.load do
-      roster :alice, :bob
-      on("2026-05-06") { pair :alice, :bob }
-    end
-    recommender = Pairnal::Recommender.new(history, today: TODAY)
-    description = recommender.describe(Pairnal::Group.of(:alice, :bob))
-    assert_includes description, "30d"
-    assert_includes description, "since last worked together"
-  end
 end
