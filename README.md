@@ -19,7 +19,7 @@ roster :alice, :bob, :carol, :dan, :eli
 on "2026-06-01" do
   pair :alice, :bob
   pair :carol, :dan
-  # eli sits out
+  solo :eli 
 end
 
 on "2026-05-25" do
@@ -40,7 +40,7 @@ $ pairnal
 === Option 1  (total staleness: 1095) ===
   alice + dan  (never paired)
   bob + carol  (never paired)
-  eli  -- sits out
+  eli  -- solo
 
 === Option 2  (total staleness: 1090) ===
   ...

@@ -61,10 +61,10 @@ class TestRecommender < Minitest::Test
     end
   end
 
-  def test_describe_solo_includes_sits_out
+  def test_describe_solo_includes_solos
     history = Pairnal::History.load { roster :alice }
     recommender = Pairnal::Recommender.new(history, today: TODAY)
-    assert_includes recommender.describe(Pairnal::Group.of(:alice)), "sits out"
+    assert_includes recommender.describe(Pairnal::Group.of(:alice)), "solo"
   end
 
   def test_describe_never_paired_includes_never_paired

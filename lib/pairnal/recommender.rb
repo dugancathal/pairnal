@@ -22,7 +22,7 @@ module Pairnal
     end
 
     def describe(group)
-      return "#{group}  -- sits out" if group.solo?
+      return "#{group}  -- solo" if group.solo?
 
       a, b = group.members
       if @last_paired[[a, b].sort]
