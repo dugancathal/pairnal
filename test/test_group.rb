@@ -3,9 +3,8 @@
 require "test_helper"
 
 class TestGroup < Minitest::Test
-  def test_of_creates_group_from_variadic_members
-    group = Pairnal::Group.of(:alice, :bob)
-    assert_equal [:alice, :bob], group.members
+  def test_of_sorts_members
+    assert_equal [:alice, :bob], Pairnal::Group.of(:bob, :alice).members
   end
 
   def test_solo_true_for_one_member

@@ -27,7 +27,6 @@ class TestCommandsRecommend < Minitest::Test
     assert_includes output, "alice + bob"
   end
 
-
   private
 
   def capture

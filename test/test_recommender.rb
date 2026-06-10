@@ -86,5 +86,4 @@ class TestRecommender < Minitest::Test
     recommender = Pairnal::Recommender.new(history, today: TODAY)
     refute recommender.over_paired?(:alice, :bob)
   end
-
 end
