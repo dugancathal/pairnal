@@ -16,12 +16,12 @@ module Pairnal
           counts = Pairnal::Stats.new(@history).pair_counts
           others = @history.roster.to_a - [person]
 
-          paired, never = others.partition { |other| counts[Group.of(person, other)]&.positive? }
-          paired.sort_by! { |other| -counts[Group.of(person, other)] }
+          paired, never = others.partition { |other| counts[Group.of(*[person, other].sort)]&.positive? }
+          paired.sort_by! { |other| -counts[Group.of(*[person, other].sort)] }
 
           output.puts "=== #{person} ==="
           paired.each do |other|
-            count = counts[Group.of(person, other)]
+            count = counts[Group.of(*[person, other].sort)]
             output.puts "  #{other}: #{count} #{count == 1 ? "time" : "times"}"
           end
           output.puts "  (never paired with: #{never.join(", ")})" if never.any?

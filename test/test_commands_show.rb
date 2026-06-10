@@ -24,6 +24,13 @@ class TestCommandsShow < Minitest::Test
     assert_includes output, "carol: 1 time"
   end
 
+  def test_lookup_is_reciprocal
+    output_alice = capture { |io| Pairnal::Cli::Commands::Show.new(@history).call(["alice"], output: io) }
+    output_bob = capture { |io| Pairnal::Cli::Commands::Show.new(@history).call(["bob"], output: io) }
+    assert_includes output_alice, "bob: 2 times"
+    assert_includes output_bob, "alice: 2 times"
+  end
+
   def test_sorts_partners_by_count_descending
     output = capture { |io| Pairnal::Cli::Commands::Show.new(@history).call(["alice"], output: io) }
     bob_pos = output.index("bob")
