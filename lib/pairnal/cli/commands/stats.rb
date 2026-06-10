@@ -10,8 +10,8 @@ module Pairnal
           counts = Pairnal::Stats.new(@history).pair_counts
 
           output.puts "=== Pairing Leaderboard ==="
-          counts.sort_by { |_, count| -count }.each do |(a,b), count|
-            output.puts "  #{a} + #{b}: #{count} #{count == 1 ? "time" : "times"}"
+          counts.sort_by { |_, count| -count }.each do |group, count|
+            output.puts "  #{group}: #{count} #{count == 1 ? "time" : "times"}"
           end
         end
       end

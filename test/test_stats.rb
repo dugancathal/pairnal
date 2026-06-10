@@ -10,7 +10,7 @@ class TestStats < Minitest::Test
       on("2026-01-08") { pair :alice, :bob }
     end
     counts = Pairnal::Stats.new(history).pair_counts
-    assert_equal 2, counts[[:alice, :bob]]
+    assert_equal 2, counts[Pairnal::Group.of(:alice, :bob)]
   end
 
   def test_pair_counts_counts_each_pair_in_a_mob
@@ -19,9 +19,9 @@ class TestStats < Minitest::Test
       on("2026-01-01") { mob :alice, :bob, :carol }
     end
     counts = Pairnal::Stats.new(history).pair_counts
-    assert_equal 1, counts[[:alice, :bob]]
-    assert_equal 1, counts[[:alice, :carol]]
-    assert_equal 1, counts[[:bob, :carol]]
+    assert_equal 1, counts[Pairnal::Group.of(:alice, :bob)]
+    assert_equal 1, counts[Pairnal::Group.of(:alice, :carol)]
+    assert_equal 1, counts[Pairnal::Group.of(:bob, :carol)]
   end
 
   def test_pair_counts_returns_empty_hash_for_no_sessions
