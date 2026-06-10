@@ -28,4 +28,23 @@ class TestStats < Minitest::Test
     history = Pairnal::History.load { roster :alice, :bob }
     assert_empty Pairnal::Stats.new(history).pair_counts
   end
+
+  def test_pair_counts_filters_sessions_by_since
+    history = Pairnal::History.load do
+      roster :alice, :bob
+      on("2026-01-01") { pair :alice, :bob }
+      on("2026-01-08") { pair :alice, :bob }
+    end
+    counts = Pairnal::Stats.new(history, since: Date.iso8601("2026-01-05")).pair_counts
+    assert_equal 1, counts[Pairnal::Group.of(:alice, :bob)]
+  end
+
+  def test_pair_counts_includes_session_on_since_date
+    history = Pairnal::History.load do
+      roster :alice, :bob
+      on("2026-01-01") { pair :alice, :bob }
+    end
+    counts = Pairnal::Stats.new(history, since: Date.iso8601("2026-01-01")).pair_counts
+    assert_equal 1, counts[Pairnal::Group.of(:alice, :bob)]
+  end
 end

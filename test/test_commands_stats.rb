@@ -57,6 +57,22 @@ class TestCommandsStats < Minitest::Test
     assert_equal "=== Pairing Leaderboard ===\n", output
   end
 
+  def test_since_filters_sessions
+    history = Pairnal::History.load do
+      roster :alice, :bob
+      on("2026-01-01") { pair :alice, :bob }
+      on("2026-01-08") { pair :alice, :bob }
+    end
+    output = capture { |io| Pairnal::Cli::Commands::Stats.new(history, since: Date.iso8601("2026-01-05")).call(output: io) }
+    assert_includes output, "alice + bob: 1 time"
+  end
+
+  def test_since_shows_date_in_header
+    history = Pairnal::History.load { roster :alice, :bob }
+    output = capture { |io| Pairnal::Cli::Commands::Stats.new(history, since: Date.iso8601("2026-01-01")).call(output: io) }
+    assert_includes output, "since 2026-01-01"
+  end
+
   private
 
   def capture
