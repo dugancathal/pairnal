@@ -11,7 +11,7 @@ module Pairnal
 
           output.puts "=== Pairing Leaderboard ==="
           counts.sort_by { |_, count| -count }.each do |group, count|
-            output.puts "  #{group}: #{count} #{count == 1 ? "time" : "times"}"
+            output.puts "  #{group}: #{count} #{(count == 1) ? "time" : "times"}"
           end
         end
       end

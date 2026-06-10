@@ -40,7 +40,7 @@ module Pairnal
           case members.size
           when 1 then "solo"
           when 2 then "pair"
-          else        "mob"
+          else "mob"
           end
         end
       end

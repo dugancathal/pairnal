@@ -32,9 +32,18 @@ class TestCommandsStats < Minitest::Test
   def test_sorts_by_count_descending
     history = Pairnal::History.load do
       roster :alice, :bob, :carol, :dan
-      on("2026-01-01") { pair :alice, :bob; pair :carol, :dan }
-      on("2026-01-08") { pair :alice, :bob; pair :carol, :dan }
-      on("2026-01-15") { pair :alice, :carol; pair :bob, :dan }
+      on("2026-01-01") {
+        pair :alice, :bob
+        pair :carol, :dan
+      }
+      on("2026-01-08") {
+        pair :alice, :bob
+        pair :carol, :dan
+      }
+      on("2026-01-15") {
+        pair :alice, :carol
+        pair :bob, :dan
+      }
     end
     output = capture { |io| Pairnal::Cli::Commands::Stats.new(history).call(output: io) }
     lines = output.lines.map(&:strip).reject(&:empty?)

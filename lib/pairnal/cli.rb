@@ -6,7 +6,7 @@ module Pairnal
       options = {history: File.expand_path(".pair-history", Dir.pwd), date: Date.today}
       OptionParser.new do |opts|
         opts.on("--history PATH") { |p| options[:history] = p }
-        opts.on("--date DATE")    { |d| options[:date] = Date.iso8601(d) }
+        opts.on("--date DATE") { |d| options[:date] = Date.iso8601(d) }
       end.parse!(args)
 
       command = args.shift || "recommend"
@@ -14,8 +14,8 @@ module Pairnal
 
       case command
       when "recommend" then Commands::Recommend.new(history).call
-      when "stats"     then Commands::Stats.new(history).call
-      when "record"    then Commands::Record.new(history.roster, options[:history]).call(args, date: options[:date])
+      when "stats" then Commands::Stats.new(history).call
+      when "record" then Commands::Record.new(history.roster, options[:history]).call(args, date: options[:date])
       end
     end
   end
