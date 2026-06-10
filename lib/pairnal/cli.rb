@@ -9,12 +9,7 @@ module Pairnal
       end.parse!(args)
 
       history = History.load_path(options[:history])
-      recommender = Recommender.new(history)
-      recommender.recommend(n: 3).each_with_index do |rec, i|
-        puts "=== Option #{i + 1}  (total staleness: #{rec.score}) ==="
-        rec.allocation.groups.each { |group| puts "  #{recommender.describe(group)}" }
-        puts
-      end
+      Commands::Recommend.new(history).call
     end
   end
 end
