@@ -2,13 +2,34 @@ require "optparse"
 
 module Pairnal
   class Cli
+    def self.subcommands = {
+      recommend: "[default command] review history and provide a recommended pairing rotation for today",
+      stats: "print a pairing leaderboard for the team",
+      show: "provided a pair's name, shows their individual stats",
+      record: "record pairs for today - e.g. me+you+them aSolo",
+    }
+
     def self.run(args)
       options = {history: File.expand_path(".pair-history", Dir.pwd), date: Date.today, since: nil}
       OptionParser.new do |opts|
-        opts.on("--history PATH") { |p| options[:history] = p }
-        opts.on("--date DATE") { |d| options[:date] = Date.iso8601(d) }
-        opts.on("--since DATE") { |d| options[:since] = Date.iso8601(d) }
-      end.parse!(args)
+        opts.banner = "pairnal [global opts] command [command opts]"
+        opts.separator ""
+        opts.separator "Available commands:"
+        subcommands.each { |name, desc| opts.separator "    #{name.to_s.ljust(12)}\t #{desc}" }
+        opts.separator ""
+
+        opts.separator "Global options:"
+        opts.on("-p", "--history-path PATH") { |p| options[:history] = p }
+        opts.on("-d", "--date DATE") { |d| options[:date] = Date.iso8601(d) }
+        opts.on("-s", "--since DATE") { |d| options[:since] = Date.iso8601(d) }
+
+
+        opts.on_tail("-h", "--help") do
+          puts opts
+
+          exit
+        end
+      end.order!(args)
 
       command = args.shift || "recommend"
       history = History.load_path(options[:history])
