@@ -2,12 +2,9 @@ module Pairnal
   class Cli
     module Commands
       class Recommend
-        LARGE_PARTITION_WARNING_SIZE = 14
-
-        def initialize(history, today: Date.today, large_partition_warning_size: LARGE_PARTITION_WARNING_SIZE)
+        def initialize(history, today: Date.today)
           @history = history
           @today = today
-          @large_partition_warning_size = large_partition_warning_size
         end
 
         def call(args = [], output: $stdout)
@@ -19,10 +16,6 @@ module Pairnal
           @history.stream_partitions.each do |stream|
             fixed, anchors = declarations_for(declarations, stream)
             output.puts "-- #{stream.name} --" unless stream.unnamed?
-            if stream.members.size > @large_partition_warning_size
-              output.puts "  (warning: #{stream.members.size} people in this group -- " \
-                          "generating recommendations may be slow; consider splitting into streams)"
-            end
             recs = recommender.recommend(n: 3, members: stream.members, fixed:, anchors:)
             if recs.empty? && (fixed.any? || anchors.any?)
               output.puts "  (no valid pairing satisfies the given constraints)"

@@ -48,20 +48,6 @@ class TestCommandsRecommend < Minitest::Test
     assert_includes output, "-- unassigned --"
   end
 
-  def test_prints_warning_for_large_partition
-    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan }
-    command = Pairnal::Cli::Commands::Recommend.new(history, today: TODAY, large_partition_warning_size: 1)
-    output = capture { |io| command.call(output: io) }
-    assert_includes output, "warning"
-  end
-
-  def test_no_warning_for_small_partition
-    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan }
-    command = Pairnal::Cli::Commands::Recommend.new(history, today: TODAY)
-    output = capture { |io| command.call(output: io) }
-    refute_includes output, "warning"
-  end
-
   def test_fixed_group_appears_in_every_option
     history = Pairnal::History.load { roster :alice, :bob, :carol, :dan, :eli, :frank }
     command = Pairnal::Cli::Commands::Recommend.new(history, today: TODAY)

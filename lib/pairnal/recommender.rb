@@ -7,13 +7,27 @@ module Pairnal
       @today = today
       @never_paired = never_paired
       @last_paired = history.last_paired
+      @sessions_by_date = history.sessions.sort_by(&:date)
     end
 
     def recommend(n: 3, members: @history.roster.members, fixed: [], anchors: [])
-      allocations(members, fixed:, anchors:)
-        .map { |alloc| Recommendation.new(allocation: alloc, score: score(alloc)) }
-        .sort_by { |rec| -rec.score }
-        .first(n)
+      committed = fixed.flat_map(&:members) + anchors.flatten
+      free = members.to_a - committed
+      units = anchors.map(&:dup) + free.map { |m| [m] }
+      free_start = anchors.size
+
+      base_score = fixed.sum { |group| internal_staleness(group.members) } +
+        units.sum { |unit| internal_staleness(unit) }
+
+      matcher = Matching.new(units.size,
+        weight: ->(i, j) { (i < free_start && j < free_start) ? Matching::FORBIDDEN : cross_staleness(units[i], units[j]) },
+        leftover_eligible: ->(i) { i >= free_start })
+
+      matcher.top(n).map do |result|
+        groups = fixed + result.pairs.map { |i, j| Group.of(*units[i], *units[j]) }
+        groups += [Group.of(*units[result.leftover])] if result.leftover
+        Recommendation.new(allocation: Allocation.new(groups:), score: base_score + result.weight)
+      end
     end
 
     def staleness(a, b)
@@ -24,51 +38,16 @@ module Pairnal
     def ever_paired?(a, b) = @last_paired[[a, b].sort]
 
     def over_paired?(a, b, streak: 2)
-      recent = @history.sessions.sort_by(&:date).last(streak)
+      recent = @sessions_by_date.last(streak)
       recent.size == streak && recent.all? { |s| s.pairs.include?([a, b].sort) }
     end
 
     private
 
-    def score(alloc)
-      alloc.groups.sum { |group| group.pairs.sum { |a, b| staleness(a, b) } }
-    end
+    def internal_staleness(members) = members.combination(2).sum { |a, b| staleness(a, b) }
 
-    def allocations(members, fixed: [], anchors: [], &blk)
-      return enum_for(:allocations, members, fixed:, anchors:) unless blk
-
-      committed = fixed.flat_map(&:members) + anchors.flatten
-      free = members.to_a - committed
-      anchor_units = anchors.map(&:dup)
-      free_units = free.zip
-      units = anchor_units + free_units
-
-      if units.size.even?
-        matchings(units, anchor_units:) { |groups| yield Allocation.new(groups: fixed + groups) }
-      else
-        free_units.each_with_index do |out, i|
-          rest = anchor_units + free_units[0...i] + free_units[(i + 1)..]
-          matchings(rest, anchor_units:) { |groups| yield Allocation.new(groups: fixed + groups + [Group.of(*out)]) }
-        end
-      end
-    end
-
-    def matchings(units, anchor_units: [], &blk)
-      return enum_for(:matchings, units, anchor_units:) unless blk
-
-      if units.empty?
-        yield []
-        return
-      end
-
-      first, *rest = units
-      first_anchored = anchor_units.any? { |a| a.equal?(first) }
-      rest.each_with_index do |partner, i|
-        next if first_anchored && anchor_units.any? { |a| a.equal?(partner) }
-
-        remaining = rest[0...i] + rest[(i + 1)..]
-        matchings(remaining, anchor_units:) { |sub| yield([Group.of(*first, *partner)] + sub) }
-      end
+    def cross_staleness(unit_a, unit_b)
+      unit_a.sum { |a| unit_b.sum { |b| staleness(a, b) } }
     end
   end
 end
