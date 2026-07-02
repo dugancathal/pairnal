@@ -76,4 +76,86 @@ class TestHistoryDslHistory < Minitest::Test
     history = Pairnal::History.load { roster :alice }
     assert_instance_of Pairnal::History, history
   end
+
+  def test_stream_adds_a_named_stream
+    history = Pairnal::History.load do
+      roster :alice, :bob, :carol
+      stream :frontend, :alice, :bob
+    end
+    assert_equal 1, history.streams.size
+    assert_equal "frontend", history.streams.first.name
+    assert_equal [:alice, :bob], history.streams.first.members
+  end
+
+  def test_stream_resolves_full_names_to_aliases
+    history = Pairnal::History.load do
+      roster alice: "Alice Smith", bob: "Bob Jones"
+      stream :frontend, "Alice Smith", "Bob Jones"
+    end
+    assert_equal [:alice, :bob], history.streams.first.members
+  end
+
+  def test_stream_raises_for_unknown_symbol_member
+    assert_raises(ArgumentError) do
+      Pairnal::History.load do
+        roster :alice, :bob
+        stream :frontend, :alice, :nobody
+      end
+    end
+  end
+
+  def test_stream_raises_argument_error_for_unknown_string_member
+    assert_raises(ArgumentError) do
+      Pairnal::History.load do
+        roster :alice, :bob
+        stream :frontend, "Not A Real Person"
+      end
+    end
+  end
+
+  def test_stream_raises_for_unsupported_member_type
+    assert_raises(ArgumentError) do
+      Pairnal::History.load do
+        roster :alice, :bob
+        stream :frontend, 42
+      end
+    end
+  end
+
+  def test_stream_raises_for_zero_members
+    assert_raises(ArgumentError) do
+      Pairnal::History.load do
+        roster :alice, :bob
+        stream :frontend
+      end
+    end
+  end
+
+  def test_stream_raises_for_reserved_unassigned_name
+    assert_raises(ArgumentError) do
+      Pairnal::History.load do
+        roster :alice, :bob
+        stream :unassigned, :alice, :bob
+      end
+    end
+  end
+
+  def test_stream_deduplicates_repeated_members
+    history = Pairnal::History.load do
+      roster :alice, :bob
+      stream :frontend, :alice, :alice, :bob
+    end
+    assert_equal [:alice, :bob], history.streams.first.members
+  end
+
+  def test_stream_allows_a_person_in_multiple_streams
+    history = Pairnal::History.load do
+      roster :alice, :bob, :carol
+      stream :frontend, :alice, :bob
+      stream :backend, :alice, :carol
+    end
+    assert_equal 2, history.streams.size
+    assert_equal [:alice, :bob], history.streams[0].members
+    assert_equal [:alice, :carol], history.streams[1].members
+  end
 end

@@ -21,8 +21,7 @@ module Pairnal
         end
 
         def validate!(groups)
-          unknown = groups.flatten.reject { |a| @roster.include?(a) }
-          raise ArgumentError, "unknown roster members: #{unknown.join(", ")}" if unknown.any?
+          @roster.validate_members!(groups.flatten)
         end
 
         def append_session(date, groups)

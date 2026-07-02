@@ -6,7 +6,7 @@ module Pairnal
       recommend: "[default command] review history and provide a recommended pairing rotation for today",
       stats: "print a pairing leaderboard for the team",
       show: "provided a pair's name, shows their individual stats",
-      record: "record pairs for today - e.g. me+you+them aSolo",
+      record: "record pairs for today - e.g. me+you+them aSolo"
     }
 
     def self.run(args)
@@ -22,7 +22,6 @@ module Pairnal
         opts.on("-p", "--history-path PATH") { |p| options[:history] = p }
         opts.on("-d", "--date DATE") { |d| options[:date] = Date.iso8601(d) }
         opts.on("-s", "--since DATE") { |d| options[:since] = Date.iso8601(d) }
-
 
         opts.on_tail("-h", "--help") do
           puts opts

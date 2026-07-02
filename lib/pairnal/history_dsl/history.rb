@@ -4,6 +4,7 @@ module Pairnal
       def initialize
         @roster = Roster.new({})
         @sessions = []
+        @streams = []
       end
 
       def roster(*people, **names)
@@ -20,7 +21,28 @@ module Pairnal
         @sessions << builder.to_session
       end
 
-      def to_history = Pairnal::History.new(roster: @roster, sessions: @sessions)
+      def stream(name, *members)
+        raise ArgumentError, "stream needs at least 1 member, got 0" if members.empty?
+        raise ArgumentError, "stream name \"unassigned\" is reserved" if name.to_s == "unassigned"
+
+        resolved = members.map { |m| resolve_stream_member(m) }.uniq
+        @roster.validate_members!(resolved)
+
+        @streams << Pairnal::Stream.new(name: name.to_s, members: resolved)
+      end
+
+      def to_history = Pairnal::History.new(roster: @roster, sessions: @sessions, streams: @streams)
+
+      private
+
+      def resolve_stream_member(identifier)
+        case identifier
+        when Symbol, String then @roster.resolve(identifier)
+        else identifier
+        end
+      rescue KeyError
+        identifier
+      end
     end
   end
 end

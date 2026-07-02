@@ -9,8 +9,8 @@ module Pairnal
       @last_paired = history.last_paired
     end
 
-    def recommend(n: 3)
-      allocations(@history.roster)
+    def recommend(n: 3, members: @history.roster.members)
+      allocations(members)
         .map { |alloc| Recommendation.new(allocation: alloc, score: score(alloc)) }
         .sort_by { |rec| -rec.score }
         .first(n)
@@ -34,10 +34,10 @@ module Pairnal
       alloc.groups.sum { |group| group.pairs.sum { |a, b| staleness(a, b) } }
     end
 
-    def allocations(roster, &blk)
-      return enum_for(:allocations, roster) unless blk
+    def allocations(members, &blk)
+      return enum_for(:allocations, members) unless blk
 
-      members = roster.to_a
+      members = members.to_a
       if members.size.even?
         matchings(members) { |groups| yield Allocation.new(groups:) }
       else

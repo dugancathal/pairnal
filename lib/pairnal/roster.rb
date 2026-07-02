@@ -28,5 +28,10 @@ module Pairnal
       when Roster then members == other.members
       end
     end
+
+    def validate_members!(members)
+      unknown = members.reject { |m| include?(m) }
+      raise ArgumentError, "unknown roster members: #{unknown.join(", ")}" unless unknown.empty?
+    end
   end
 end

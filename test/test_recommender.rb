@@ -86,4 +86,15 @@ class TestRecommender < Minitest::Test
     recommender = Pairnal::Recommender.new(history, today: TODAY)
     refute recommender.over_paired?(:alice, :bob)
   end
+
+  def test_recommend_scopes_allocations_to_given_members
+    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan, :eli, :frank }
+    recommender = Pairnal::Recommender.new(history, today: TODAY)
+    scoped = [:alice, :bob, :carol, :dan]
+    recommender.recommend(n: 3, members: scoped).each do |rec|
+      rec.allocation.groups.each do |group|
+        group.members.each { |m| assert_includes scoped, m }
+      end
+    end
+  end
 end

@@ -27,6 +27,41 @@ class TestCommandsRecommend < Minitest::Test
     assert_includes output, "alice + bob"
   end
 
+  def test_prints_a_section_per_declared_stream
+    history = Pairnal::History.load do
+      roster :alice, :bob, :carol, :dan
+      stream :frontend, :alice, :bob
+      stream :backend, :carol, :dan
+    end
+    output = capture { |io| Pairnal::Cli::Commands::Recommend.new(history, today: TODAY).call(output: io) }
+    assert_includes output, "-- frontend --"
+    assert_includes output, "-- backend --"
+  end
+
+  def test_prints_unassigned_section_for_leftover_members
+    history = Pairnal::History.load do
+      roster :alice, :bob, :carol
+      stream :frontend, :alice, :bob
+    end
+    output = capture { |io| Pairnal::Cli::Commands::Recommend.new(history, today: TODAY).call(output: io) }
+    assert_includes output, "-- frontend --"
+    assert_includes output, "-- unassigned --"
+  end
+
+  def test_prints_warning_for_large_partition
+    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan }
+    command = Pairnal::Cli::Commands::Recommend.new(history, today: TODAY, large_partition_warning_size: 1)
+    output = capture { |io| command.call(output: io) }
+    assert_includes output, "warning"
+  end
+
+  def test_no_warning_for_small_partition
+    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan }
+    command = Pairnal::Cli::Commands::Recommend.new(history, today: TODAY)
+    output = capture { |io| command.call(output: io) }
+    refute_includes output, "warning"
+  end
+
   private
 
   def capture
