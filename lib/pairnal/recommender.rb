@@ -44,17 +44,17 @@ module Pairnal
       units = anchor_units + free_units
 
       if units.size.even?
-        matchings(units) { |groups| yield Allocation.new(groups: fixed + groups) }
+        matchings(units, anchor_units:) { |groups| yield Allocation.new(groups: fixed + groups) }
       else
         free_units.each_with_index do |out, i|
           rest = anchor_units + free_units[0...i] + free_units[(i + 1)..]
-          matchings(rest) { |groups| yield Allocation.new(groups: fixed + groups + [Group.of(*out)]) }
+          matchings(rest, anchor_units:) { |groups| yield Allocation.new(groups: fixed + groups + [Group.of(*out)]) }
         end
       end
     end
 
-    def matchings(units, &blk)
-      return enum_for(:matchings, units) unless blk
+    def matchings(units, anchor_units: [], &blk)
+      return enum_for(:matchings, units, anchor_units:) unless blk
 
       if units.empty?
         yield []
@@ -62,9 +62,12 @@ module Pairnal
       end
 
       first, *rest = units
+      first_anchored = anchor_units.any? { |a| a.equal?(first) }
       rest.each_with_index do |partner, i|
+        next if first_anchored && anchor_units.any? { |a| a.equal?(partner) }
+
         remaining = rest[0...i] + rest[(i + 1)..]
-        matchings(remaining) { |sub| yield([Group.of(*first, *partner)] + sub) }
+        matchings(remaining, anchor_units:) { |sub| yield([Group.of(*first, *partner)] + sub) }
       end
     end
   end
