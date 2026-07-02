@@ -62,6 +62,49 @@ class TestCommandsRecommend < Minitest::Test
     refute_includes output, "warning"
   end
 
+  def test_fixed_group_appears_in_every_option
+    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan, :eli, :frank }
+    command = Pairnal::Cli::Commands::Recommend.new(history, today: TODAY)
+    output = capture { |io| command.call(["alice+bob"], output: io) }
+    assert_equal 3, output.scan("alice + bob").size
+  end
+
+  def test_anchor_pairs_person_with_someone
+    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan }
+    command = Pairnal::Cli::Commands::Recommend.new(history, today: TODAY)
+    output = capture { |io| command.call(["alice+"], output: io) }
+    assert_match(/alice \+ \w+/, output)
+  end
+
+  def test_bare_name_is_a_fixed_solo
+    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan }
+    command = Pairnal::Cli::Commands::Recommend.new(history, today: TODAY)
+    output = capture { |io| command.call(["alice"], output: io) }
+    assert_includes output, "alice  -- solo"
+  end
+
+  def test_unknown_member_raises
+    history = Pairnal::History.load { roster :alice, :bob }
+    command = Pairnal::Cli::Commands::Recommend.new(history, today: TODAY)
+    assert_raises(ArgumentError) { command.call(["zeke+"], output: StringIO.new) }
+  end
+
+  def test_duplicate_member_raises
+    history = Pairnal::History.load { roster :alice, :bob, :carol }
+    command = Pairnal::Cli::Commands::Recommend.new(history, today: TODAY)
+    assert_raises(ArgumentError) { command.call(["alice+", "alice+bob"], output: StringIO.new) }
+  end
+
+  def test_declaration_spanning_multiple_streams_raises
+    history = Pairnal::History.load do
+      roster :alice, :bob, :carol, :dan
+      stream :frontend, :alice, :bob
+      stream :backend, :carol, :dan
+    end
+    command = Pairnal::Cli::Commands::Recommend.new(history, today: TODAY)
+    assert_raises(ArgumentError) { command.call(["alice+carol"], output: StringIO.new) }
+  end
+
   private
 
   def capture

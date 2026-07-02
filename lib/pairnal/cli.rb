@@ -30,11 +30,11 @@ module Pairnal
         end
       end.order!(args)
 
-      command = args.shift || "recommend"
+      command = subcommands.key?(args.first&.to_sym) ? args.shift : "recommend"
       history = History.load_path(options[:history])
 
       case command
-      when "recommend" then Commands::Recommend.new(history).call
+      when "recommend" then Commands::Recommend.new(history).call(args)
       when "stats" then Commands::Stats.new(history, since: options[:since]).call
       when "show" then Commands::Show.new(history).call(args)
       when "record" then Commands::Record.new(history.roster, options[:history]).call(args, date: options[:date])

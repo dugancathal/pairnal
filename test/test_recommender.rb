@@ -97,4 +97,56 @@ class TestRecommender < Minitest::Test
       end
     end
   end
+
+  def test_recommend_with_fixed_locks_group_in_every_allocation
+    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan }
+    recommender = Pairnal::Recommender.new(history, today: TODAY)
+    fixed = [Pairnal::Group.of(:alice, :bob)]
+    recommender.recommend(n: 3, fixed:).each do |rec|
+      assert_includes rec.allocation.groups, Pairnal::Group.of(:alice, :bob)
+    end
+  end
+
+  def test_recommend_with_anchor_always_pairs_anchor_with_someone
+    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan }
+    recommender = Pairnal::Recommender.new(history, today: TODAY)
+    recommender.recommend(n: 3, anchors: [[:alice]]).each do |rec|
+      group = rec.allocation.groups.find { |g| g.members.include?(:alice) }
+      refute_nil group
+      assert group.members.size >= 2
+    end
+  end
+
+  def test_recommend_with_multi_name_anchor_forms_a_mob
+    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan }
+    recommender = Pairnal::Recommender.new(history, today: TODAY)
+    recommender.recommend(n: 3, anchors: [[:alice, :bob]]).each do |rec|
+      group = rec.allocation.groups.find { |g| g.members.include?(:alice) }
+      assert_equal [:alice, :bob], (group.members & [:alice, :bob]).sort
+      assert group.mob?
+    end
+  end
+
+  def test_recommend_odd_sit_out_is_never_an_anchor
+    history = Pairnal::History.load { roster :alice, :bob, :carol }
+    recommender = Pairnal::Recommender.new(history, today: TODAY)
+    recommender.recommend(n: 3, anchors: [[:alice]]).each do |rec|
+      solo = rec.allocation.groups.find(&:solo?)
+      refute_nil solo
+      refute_equal :alice, solo.members.first
+    end
+  end
+
+  def test_recommend_combines_fixed_and_anchors_and_free_members
+    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan, :eli, :frank }
+    recommender = Pairnal::Recommender.new(history, today: TODAY)
+    fixed = [Pairnal::Group.of(:alice, :bob)]
+    anchors = [[:carol]]
+    recommender.recommend(n: 3, fixed:, anchors:).each do |rec|
+      assert_includes rec.allocation.groups, Pairnal::Group.of(:alice, :bob)
+      carol_group = rec.allocation.groups.find { |g| g.members.include?(:carol) }
+      assert carol_group.members.size >= 2
+      rec.allocation.groups.sum { |g| g.members.size }.then { |total| assert_equal 6, total }
+    end
+  end
 end
