@@ -137,6 +137,14 @@ class TestRecommender < Minitest::Test
     end
   end
 
+  def test_recommend_with_two_anchors_never_pairs_them_together
+    history = Pairnal::History.load { roster :alice, :bob, :carol, :dan }
+    recommender = Pairnal::Recommender.new(history, today: TODAY)
+    recommender.recommend(n: 20, anchors: [[:alice], [:bob]]).each do |rec|
+      refute_includes rec.allocation.groups, Pairnal::Group.of(:alice, :bob)
+    end
+  end
+
   def test_recommend_combines_fixed_and_anchors_and_free_members
     history = Pairnal::History.load { roster :alice, :bob, :carol, :dan, :eli, :frank }
     recommender = Pairnal::Recommender.new(history, today: TODAY)
