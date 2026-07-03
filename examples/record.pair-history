@@ -1,0 +1,20 @@
+# Showcases: the `record` command, which appends today's pairings to a
+# history file instead of hand-editing the DSL.
+#
+# `record` appends to whichever file you point it at, so copy this one
+# somewhere disposable before trying it:
+#
+#   cp examples/record.pair-history /tmp/demo.pair-history
+#   pairnal -p /tmp/demo.pair-history record alice+carol bob+dan
+#   cat /tmp/demo.pair-history
+#
+# Look for: a new "on ... do / pair ... / end" block appended for
+# today's date, generated straight from the alice+carol / bob+dan
+# arguments.
+
+roster :alice, :bob, :carol, :dan
+
+on "2026-06-01" do
+  pair :alice, :bob
+  pair :carol, :dan
+end

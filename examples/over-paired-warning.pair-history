@@ -1,0 +1,21 @@
+# Showcases: the "(!)" over-paired warning. It's appended to a pair in
+# the recommendation output whenever that same pair also worked together
+# in each of the last two recorded sessions.
+#
+# Usage:
+#   pairnal -p examples/over-paired-warning.pair-history -d 2026-07-03
+#
+# Look for: "alice + bob ... (!)" -- with only two people on the roster
+# there's no other possible pairing, and they've paired in both of the
+# last two sessions, so the warning fires even though it's still the only
+# recommendation there is.
+
+roster :alice, :bob
+
+on "2026-06-20" do
+  pair :alice, :bob
+end
+
+on "2026-06-27" do
+  pair :alice, :bob
+end

@@ -1,0 +1,26 @@
+# Showcases: partial pairing declarations on the `recommend` command
+# line, layered on top of the normal staleness search for whoever's left:
+#
+#   rob+alex   -- a fixed group: rob and alex are locked together in
+#                 every option (groups print with members alphabetized,
+#                 so look for "alex + rob").
+#   tj+        -- an anchor: tj is guaranteed a group, but the search
+#                 picks who joins.
+#   priya      -- a bare name: a fixed solo for the day.
+#   rob+alex+  -- an anchor on an existing pair: one more person joins
+#                 rob and alex to form a 3-person mob.
+#
+# Usage:
+#   pairnal -p examples/fixed-groups-and-anchors.pair-history recommend rob+alex tj+ priya
+#   pairnal -p examples/fixed-groups-and-anchors.pair-history recommend rob+alex+ tj+
+#
+# Look for: "alex + rob" and "priya  -- solo" locked into every option in
+# the first command; an "alex + rob + <someone>  -- mob" in the second.
+
+roster :tj, :rob, :alex, :priya, :sam, :jordan
+
+on "2026-06-10" do
+  pair :tj, :rob
+  pair :alex, :priya
+  pair :sam, :jordan
+end

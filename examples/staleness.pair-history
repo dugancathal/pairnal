@@ -1,0 +1,23 @@
+# Showcases: staleness-based ranking. `recommend` scores every possible
+# pairing by days since each pair last worked together, and treats pairs
+# that have never worked together as the most stale of all (365 days by
+# default) -- so they're prioritized over any pair with real history.
+#
+# Usage:
+#   pairnal -p examples/staleness.pair-history -d 2026-07-03
+#
+# Look for: the top option pairs up alice+dan and bob+carol -- the two
+# combinations that have never happened -- ahead of pairs that already
+# worked together a week or two ago.
+
+roster :alice, :bob, :carol, :dan
+
+on "2026-06-20" do
+  pair :alice, :bob
+  pair :carol, :dan
+end
+
+on "2026-06-27" do
+  pair :alice, :carol
+  pair :bob, :dan
+end

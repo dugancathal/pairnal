@@ -1,0 +1,22 @@
+# Showcases: `stream` partitions. Recommendations are generated
+# separately within each named sub-team, and anyone left off of every
+# stream is gathered into an automatic "unassigned" stream of their own.
+#
+# Usage:
+#   pairnal -p examples/streams.pair-history -d 2026-07-03
+#
+# Look for: separate "-- frontend --", "-- backend --", and
+# "-- unassigned --" sections, each recommending pairings only among that
+# group's own members (eli, on no stream, ends up sitting solo alone in
+# "unassigned").
+
+roster :alice, :bob, :carol, :dan, :eli
+
+stream :frontend, :alice, :bob
+stream :backend, :carol, :dan
+
+on "2026-06-15" do
+  pair :alice, :bob
+  pair :carol, :dan
+  solo :eli
+end

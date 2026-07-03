@@ -1,0 +1,18 @@
+# Showcases: `mob` sessions (three or more people who worked together in
+# one group) and how every pairwise combination inside a mob counts toward
+# stats independently, same as if they'd paired up one-on-one.
+#
+# Usage:
+#   pairnal -p examples/mobs.pair-history stats
+#   pairnal -p examples/mobs.pair-history show alice
+#
+# Look for: alice, bob, and carol each show up paired "1 time" with each
+# other, even though the three of them only ever appeared together in a
+# single 3-person mob.
+
+roster :alice, :bob, :carol, :dan, :eli
+
+on "2026-06-15" do
+  mob :alice, :bob, :carol
+  pair :dan, :eli
+end

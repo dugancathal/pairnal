@@ -1,0 +1,28 @@
+# Showcases: the `stats` leaderboard (overall and narrowed with
+# --since), and `show` for one person's individual pairing history.
+#
+# Usage:
+#   pairnal -p examples/stats-and-show.pair-history stats
+#   pairnal -p examples/stats-and-show.pair-history -s 2026-05-15 stats
+#   pairnal -p examples/stats-and-show.pair-history show alice
+#
+# Look for: alice+bob and carol+dan leading the all-time leaderboard with
+# 2 times each, but only 1 time each once --since narrows it down to just
+# the most recent session.
+
+roster :alice, :bob, :carol, :dan
+
+on "2026-04-01" do
+  pair :alice, :bob
+  pair :carol, :dan
+end
+
+on "2026-05-01" do
+  pair :alice, :carol
+  pair :bob, :dan
+end
+
+on "2026-06-01" do
+  pair :alice, :bob
+  pair :carol, :dan
+end
