@@ -30,6 +30,45 @@ class TestBoard < Minitest::Test
     end
   end
 
+  def test_state_preloads_groups_from_the_most_recent_session
+    with_history_file(<<~HISTORY) do |path|
+      roster :alice, :bob, :carol, :dan
+      on "2026-06-01" do
+        pair :alice, :bob
+      end
+      on "2026-06-08" do
+        pair :alice, :carol
+        pair :bob, :dan
+      end
+    HISTORY
+      stream = board(path).state[:streams].find { |s| s[:name].nil? }
+      assert_includes stream[:groups], %w[alice carol]
+      assert_includes stream[:groups], %w[bob dan]
+    end
+  end
+
+  def test_state_drops_previous_groupmates_no_longer_in_the_stream
+    with_history_file(<<~HISTORY) do |path|
+      roster :alice, :bob, :carol
+      stream :frontend, :alice, :bob
+      on "2026-06-08" do
+        pair :alice, :carol
+      end
+    HISTORY
+      frontend = board(path).state[:streams].find { |s| s[:name] == "frontend" }
+      assert_equal [["alice"]], frontend[:groups]
+    end
+  end
+
+  def test_state_has_no_preloaded_groups_without_history
+    with_history_file(<<~HISTORY) do |path|
+      roster :alice, :bob
+    HISTORY
+      stream = board(path).state[:streams].first
+      assert_empty stream[:groups]
+    end
+  end
+
   def test_state_reports_staleness_between_every_pair
     with_history_file(<<~HISTORY) do |path|
       roster :alice, :bob

@@ -16,11 +16,12 @@ module Pairnal
       roster = history.roster
       recommender = Recommender.new(history, today: @today)
       members = roster.members
+      previous_groups = last_session_groups(history)
 
       {
         today: @today.iso8601,
         displayNames: members.to_h { |m| [m.to_s, roster.display_name(m)] },
-        streams: history.stream_partitions.map { |s| {name: s.name, members: s.members.map(&:to_s)} },
+        streams: history.stream_partitions.map { |s| stream_payload(s, previous_groups) },
         staleness: members.combination(2).to_h { |a, b| [staleness_key(a, b), pairing_info(recommender, a, b)] }
       }
     end
@@ -59,6 +60,22 @@ module Pairnal
     private
 
     def load_history = History.load_path(@history_path)
+
+    # Seeds each stream's board with whoever was grouped together last time,
+    # so pairs stay "sticky" day to day instead of starting from scratch.
+    # Groups are filtered down to whichever of their members are still in a
+    # given stream today -- if someone's moved streams or left the roster
+    # since then, their old groupmate(s) just fall back to available rather
+    # than carrying a stale group forward.
+    def last_session_groups(history)
+      last_session = history.sessions.max_by(&:date)
+      last_session ? last_session.groups.map(&:members) : []
+    end
+
+    def stream_payload(stream, previous_groups)
+      groups = previous_groups.map { |group| group & stream.members }.reject(&:empty?)
+      {name: stream.name, members: stream.members.map(&:to_s), groups: groups.map { |g| g.map(&:to_s) }}
+    end
 
     def symbolize_groups(groups) = Array(groups).map { |g| Array(g).map(&:to_sym) }.reject(&:empty?)
 

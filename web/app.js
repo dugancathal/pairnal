@@ -17,7 +17,9 @@ async function loadState() {
     const data = await res.json();
     displayNames = data.displayNames;
     staleness = data.staleness;
-    streams = data.streams.map((s) => ({name: s.name, members: s.members, groups: []}));
+    // Groups start pre-filled with whoever was grouped together last
+    // session, so pairs stay put unless you deliberately drag them apart.
+    streams = data.streams.map((s) => ({name: s.name, members: s.members, groups: s.groups || []}));
     document.getElementById("today").textContent = data.today;
     render();
   } catch (err) {
