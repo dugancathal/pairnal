@@ -6,7 +6,8 @@ module Pairnal
       recommend: "[default command] review history and provide a recommended pairing rotation for today",
       stats: "print a pairing leaderboard for the team",
       show: "provided a pair's name, shows their individual stats",
-      record: "record pairs for today - e.g. me+you+them aSolo"
+      record: "record pairs for today - e.g. me+you+them aSolo",
+      serve: "launch a local web UI for drag-and-drop group allocation"
     }
 
     def self.run(args)
@@ -38,6 +39,7 @@ module Pairnal
       when "stats" then Commands::Stats.new(history, since: options[:since]).call
       when "show" then Commands::Show.new(history).call(args)
       when "record" then Commands::Record.new(history.roster, options[:history]).call(args, date: options[:date])
+      when "serve" then Commands::Serve.new(options[:history], today: options[:date]).call(args)
       end
     end
   end

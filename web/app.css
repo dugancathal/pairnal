@@ -1,0 +1,257 @@
+:root {
+  --paper: #eef1f2;
+  --paper-raised: #e2e7e8;
+  --paper-sunken: #dfe4e5;
+  --line: #c2ccce;
+  --ink: #182227;
+  --ink-soft: #51636a;
+  --accent: #a8710f;
+  --accent-soft: #a8710f1c;
+  --accent-2: #1f6f7a;
+  --accent-2-soft: #1f6f7a1c;
+  --danger: #9c3d3d;
+  --danger-soft: #9c3d3d1c;
+  --good: #2f7a4d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #12171a;
+    --paper-raised: #1a2226;
+    --paper-sunken: #0e1214;
+    --line: #34424750;
+    --ink: #e8eef0;
+    --ink-soft: #93a7ac;
+    --accent: #e3aa47;
+    --accent-soft: #e3aa4726;
+    --accent-2: #5fb8c4;
+    --accent-2-soft: #5fb8c422;
+    --danger: #e0897f;
+    --danger-soft: #e0897f22;
+    --good: #6fbf8b;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.5rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.topbar h1 {
+  font-size: 1.15rem;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.today {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+main {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.loading { color: var(--ink-soft); }
+
+.board {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem 1.25rem;
+}
+
+.board-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.board-name {
+  font-size: 1rem;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.board-actions { display: flex; gap: 0.5rem; }
+
+.btn {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, transform 60ms ease;
+}
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--paper);
+  border-color: var(--accent);
+}
+.btn-primary:hover { filter: brightness(1.06); }
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+}
+.btn-ghost:hover { background: var(--paper-sunken); }
+
+.pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 2.6rem;
+  padding: 0.6rem;
+  margin-bottom: 0.9rem;
+  border: 1.5px dashed var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+.pool:empty::before {
+  content: "Everyone's placed";
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  align-self: center;
+}
+.pool.drag-over {
+  border-color: var(--accent-2);
+  background: var(--accent-2-soft);
+}
+
+.groups {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.group {
+  min-width: 9.5rem;
+  min-height: 3.6rem;
+  padding: 0.6rem 0.7rem;
+  border: 1.5px solid var(--line);
+  border-radius: 9px;
+  background: var(--paper);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  position: relative;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+.group.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.group:empty::before,
+.group-people:empty::before {
+  content: "";
+}
+.group .group-people:empty::before {
+  content: "Drop here";
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
+.group-people {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-height: 1.6rem;
+}
+
+.group-caption {
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+.group-caption.never-paired { color: var(--accent-2); }
+.group-caption.over-paired { color: var(--danger); font-weight: 600; }
+
+.group-remove {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.4rem;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.1rem 0.3rem;
+  border-radius: 5px;
+  display: none;
+}
+.group-remove:hover { background: var(--paper-sunken); color: var(--ink); }
+.group.is-empty .group-remove { display: block; }
+
+.chip {
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  font-size: 0.85rem;
+  cursor: grab;
+  user-select: none;
+  white-space: nowrap;
+}
+.chip:active { cursor: grabbing; }
+.chip.dragging { opacity: 0.35; }
+
+.toast {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translate(-50%, 0.5rem);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.55rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease, transform 160ms ease;
+  z-index: 20;
+}
+.toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.toast.error { background: var(--danger); }
+.toast.success { background: var(--good); }

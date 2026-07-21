@@ -28,5 +28,7 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
+  spec.add_dependency "puma", "~> 6.0"
+  spec.add_dependency "sinatra", "~> 4.0"
   spec.add_dependency "zeitwerk", "~> 2.8"
 end
