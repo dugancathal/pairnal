@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pairnal</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-title">
+      <h1>Pairnal</h1>
+      <span id="today" class="today"></span>
+    </div>
+    <button id="save-btn" class="btn btn-primary" type="button">Save today's pairings</button>
+  </header>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <main id="boards">
+    <p class="loading">Loading…</p>
+  </main>
+
+  <template id="board-template">
+    <section class="board">
+      <div class="board-header">
+        <h2 class="board-name"></h2>
+        <div class="board-actions">
+          <button class="btn btn-ghost btn-suggest" type="button">Suggest</button>
+          <button class="btn btn-ghost btn-add-group" type="button">+ Group</button>
+        </div>
+      </div>
+      <div class="pool" data-drop-target="pool"></div>
+      <div class="groups"></div>
+    </section>
+  </template>
+
+  <template id="chip-template">
+    <div class="chip" draggable="true"></div>
+  </template>
+
+  <template id="group-template">
+    <div class="group" data-drop-target="group">
+      <div class="group-people"></div>
+      <div class="group-caption"></div>
+      <button class="group-remove" type="button" title="Remove empty group">×</button>
+    </div>
+  </template>
+
+  <script src="/app.js"></script>
+</body>
+</html>
